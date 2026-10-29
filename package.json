@@ -1,8 +1,26 @@
 {
   "name": "omp-ghostty-fork-tab",
   "version": "0.1.0",
-  "private": true,
+  "description": "omp extension: bare /fork opens the forked session in a new Ghostty tab on macOS",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rinai-R/omp-ghostty-fork-tab.git"
+  },
+  "homepage": "https://github.com/Rinai-R/omp-ghostty-fork-tab#readme",
+  "bugs": {
+    "url": "https://github.com/Rinai-R/omp-ghostty-fork-tab/issues"
+  },
+  "keywords": [
+    "omp",
+    "oh-my-pi",
+    "ghostty",
+    "fork",
+    "extension"
+  ],
+  "files": [
+    "index.ts"
+  ],
   "omp": {
     "extensions": ["./index.ts"]
   }

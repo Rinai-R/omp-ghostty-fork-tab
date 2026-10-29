@@ -34,3 +34,15 @@ Restart omp (or run `/restart`) after installing. The first launch triggers the 
 - TypeScript extension module loaded directly by omp's Bun runtime; no build step.
 - The Ghostty launch is done by generating AppleScript and running it through `osascript`.
 - The extension does not take over `/fork tab`, `/fork window`, or `/fork pane`; those keep omp's built-in behavior.
+
+## Release
+
+Pushing a `v*` tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml): it checks the tag against `package.json`, smoke-tests the extension with Bun, publishes to npm with provenance, and creates the GitHub release.
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow needs `NPM_TOKEN` as an Actions secret (or variable). Bump `package.json` before tagging; a mismatched tag fails the run.
+

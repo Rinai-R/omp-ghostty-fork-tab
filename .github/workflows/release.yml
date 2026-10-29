@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify tag matches package version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      - name: Smoke test extension
+        run: |
+          bun -e '
+            const mod = await import("./index.ts");
+            if (typeof mod.default !== "function") throw new Error("missing default extension factory");
+            const script = mod.buildAppleScript({ command: ["/bin/echo", "hi"], cwd: "/tmp", env: {} });
+            if (!script.includes("new tab in front window")) throw new Error("AppleScript missing new tab");
+            if (!mod.isGhosttyHost({ TERM_PROGRAM: "ghostty" }, "darwin")) throw new Error("host detection failed");
+            if (mod.isGhosttyHost({ TERM_PROGRAM: "ghostty", TMUX: "1" }, "darwin")) throw new Error("tmux must not count as Ghostty");
+          '
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || vars.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
