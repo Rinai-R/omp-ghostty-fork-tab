@@ -1,0 +1,9 @@
+{
+  "name": "omp-ghostty-fork-tab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "omp": {
+    "extensions": ["./index.ts"]
+  }
+}
